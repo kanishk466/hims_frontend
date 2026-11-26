@@ -1,0 +1,25 @@
+/* Global tweaks only; component styling goes through Mantine props/theme. */
+:root {
+  font-variant-numeric: tabular-nums;
+}
+code {
+  font-size: 0.85em;
+  background: var(--mantine-color-gray-1);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+@media print {
+  .mantine-AppShell-header,
+  .mantine-AppShell-navbar {
+    display: none !important;
+  }
+}
+
+.demo-user-card {
+  transition: border-color 120ms, box-shadow 120ms;
+}
+button:hover > .demo-user-card,
+button:focus-visible > .demo-user-card {
+  border-color: var(--mantine-color-teal-5);
+  box-shadow: 0 0 0 2px var(--mantine-color-teal-1);
+}

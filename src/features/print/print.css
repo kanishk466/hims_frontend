@@ -1,0 +1,51 @@
+.print-sheet {
+  background: white;
+  color: black;
+  margin: 0 auto;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.15);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.print-sheet table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.print-sheet th,
+.print-sheet td {
+  text-align: left;
+  padding: 3px 4px;
+  vertical-align: top;
+}
+.print-sheet .num {
+  text-align: right;
+  white-space: nowrap;
+}
+.print-sheet .rule td,
+.print-sheet .rule th {
+  border-bottom: 1px solid #999;
+}
+.print-sheet hr {
+  border: 0;
+  border-top: 1px dashed #666;
+  margin: 6px 0;
+}
+.print-sheet .muted {
+  color: #555;
+}
+.print-sheet .hi {
+  font-family: 'Noto Sans Devanagari', 'Nirmala UI', 'Mangal', sans-serif;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body,
+  .print-bg {
+    background: white !important;
+  }
+  .print-sheet {
+    box-shadow: none;
+    margin: 0;
+  }
+}
