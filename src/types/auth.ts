@@ -118,9 +118,52 @@ export interface SessionInfo {
   preview: { realUser: { id: string; name: string } } | null
 }
 
-export interface LoginResult {
-  token: string
+/**
+ * What a login-style call returns: either a session was issued directly, or
+ * an MFA step must be completed first (added for the pilot security review).
+ * `enrollment: true` means this account has never set up TOTP and must do so
+ * now (forced for isSuperAdmin and any admin.users.edit role); `false` means
+ * TOTP is already enabled and the normal 6-digit-code screen should show.
+ * `mfaToken` is short-lived (10 min) and only valid against `/auth/mfa/*`.
+ */
+export type LoginResult = { token: string } | { mfaRequired: true; enrollment: boolean; mfaToken: string }
+
+export const hasSessionToken = (r: LoginResult): r is { token: string } => 'token' in r
+
+/* ---------- MFA (TOTP) ---------- */
+
+/** Returned by mfa/enroll and mfa/self/enroll: render qrCodeDataUrl as an <img>. */
+export interface MfaEnrollmentInfo {
+  secret: string
+  otpauthUrl: string
+  qrCodeDataUrl: string
 }
+
+/** mfa/confirm result: the only time recoveryCodes are ever shown — the user must save them now. */
+export interface MfaConfirmResult {
+  token: string
+  recoveryCodes: string[]
+}
+
+/** mfa/self/confirm result: no new session (the user already has one). */
+export interface MfaSelfConfirmResult {
+  recoveryCodes: string[]
+}
+
+export interface MfaStatus {
+  enabled: boolean
+  /** True for isSuperAdmin or any role holding admin.users.edit — self/disable is refused when true. */
+  required: boolean
+}
+
+export const mfaCodeSchema = z.object({ code: z.string().trim().regex(/^\d{6}$/, 'Enter the 6-digit code') })
+export type MfaCodeInput = z.infer<typeof mfaCodeSchema>
+
+export const mfaRecoveryCodeSchema = z.object({ recoveryCode: z.string().trim().min(1, 'Enter a recovery code') })
+export type MfaRecoveryCodeInput = z.infer<typeof mfaRecoveryCodeSchema>
+
+export const mfaDisableSchema = z.object({ password: z.string().min(1, 'Enter your password') })
+export type MfaDisableInput = z.infer<typeof mfaDisableSchema>
 
 export interface InviteInfo {
   token: string

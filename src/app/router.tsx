@@ -4,6 +4,7 @@ import { RequirePermission } from '@/auth/RequirePermission'
 import { InvitePage } from '@/features/invite/InvitePage'
 import { DemoLoginPage } from '@/features/login/DemoLoginPage'
 import { LoginPage } from '@/features/login/LoginPage'
+import { MfaChallengePage } from '@/features/login/MfaChallengePage'
 import { DepartmentFormPage } from '@/features/masters/DepartmentFormPage'
 import { DoctorFormPage } from '@/features/masters/DoctorFormPage'
 import { PanelFormPage } from '@/features/masters/PanelFormPage'
@@ -90,6 +91,7 @@ const printRoutes: RouteObject[] = [
 export const routes: RouteObject[] = [
   { path: '/login', element: <LoginPage /> },
   { path: '/login/demo', element: <DemoLoginPage /> },
+  { path: '/login/mfa', element: <MfaChallengePage /> },
   { path: '/invite/:token', element: <InvitePage /> },
   { element: <BareLayout />, children: [...menuRoute(true), ...printRoutes] },
   {

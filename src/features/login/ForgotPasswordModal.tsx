@@ -4,10 +4,10 @@ import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { isApiError } from '@/api/client'
 import { useRequestPasswordReset, useResetPassword } from '@/auth/queries'
-import { resetPasswordSchema, type ResetPasswordInput, type ResetRequestResult } from '@/types/auth'
+import { resetPasswordSchema, type LoginResult, type ResetPasswordInput, type ResetRequestResult } from '@/types/auth'
 
 /** Forgot password: code to the registered mobile, then a new password (also unlocks a locked login). */
-export function ForgotPasswordModal({ initialIdentifier, onClose, onDone }: { initialIdentifier: string; onClose: () => void; onDone: () => void }) {
+export function ForgotPasswordModal({ initialIdentifier, onClose, onDone }: { initialIdentifier: string; onClose: () => void; onDone: (result: LoginResult) => void }) {
   const [identifier, setIdentifier] = useState(initialIdentifier)
   const [sent, setSent] = useState<ResetRequestResult | null>(null)
   const request = useRequestPasswordReset()
@@ -45,7 +45,7 @@ export function ForgotPasswordModal({ initialIdentifier, onClose, onDone }: { in
           </Stack>
         </form>
       ) : (
-        <form onSubmit={handleSubmit((input) => reset.mutate({ ...input, identifier }, { onSuccess: onDone }))} noValidate>
+        <form onSubmit={handleSubmit((input) => reset.mutate({ ...input, identifier }, { onSuccess: (result) => onDone(result) }))} noValidate>
           <Stack>
             <Text size="sm">
               Code sent to <b>{sent.maskedMobile}</b>. It is valid for 10 minutes.

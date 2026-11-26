@@ -7,6 +7,13 @@ import { createUser } from './users'
 import { ApiError } from './client'
 import { getCurrentClinic } from './clinics'
 import { endpoint } from './_server'
+import { hasSessionToken } from '@/types/auth'
+
+/** No seeded test persona is simulated as MFA-gated. */
+function tokenOf(result: Awaited<ReturnType<typeof loginWithPassword>>): string {
+  if (!hasSessionToken(result)) throw new Error('Test login unexpectedly required an MFA step')
+  return result.token
+}
 
 describe('auth API', () => {
   it('lists the eight demo users in a fixed order', async () => {
@@ -58,8 +65,8 @@ describe('password sign-in', () => {
 
   it('signs in with username or mobile and the demo password', async () => {
     fresh()
-    expect((await loginWithPassword({ identifier: 'priya.patil', password: 'demo@123' })).token).toMatch(/^mock_/)
-    expect((await loginWithPassword({ identifier: '97670 34567', password: 'demo@123' })).token).toMatch(/^mock_/)
+    expect(tokenOf(await loginWithPassword({ identifier: 'priya.patil', password: 'demo@123' }))).toMatch(/^mock_/)
+    expect(tokenOf(await loginWithPassword({ identifier: '97670 34567', password: 'demo@123' }))).toMatch(/^mock_/)
   })
 
   it('does not say whether the username exists', async () => {
@@ -84,7 +91,7 @@ describe('password sign-in', () => {
     const bad = await resetPassword({ identifier: 'amit.joshi', otp: '000000', password: 'newpass123', confirm: 'newpass123' }).catch((e: ApiError) => e)
     expect((bad as ApiError).code).toBe('bad_otp')
     await resetPassword({ identifier: 'amit.joshi', otp: demoOtp!, password: 'newpass123', confirm: 'newpass123' })
-    expect((await loginWithPassword({ identifier: 'amit.joshi', password: 'newpass123' })).token).toMatch(/^mock_/)
+    expect(tokenOf(await loginWithPassword({ identifier: 'amit.joshi', password: 'newpass123' }))).toMatch(/^mock_/)
     await expect(loginWithPassword({ identifier: 'amit.joshi', password: 'demo@123' })).rejects.toThrow(/Wrong username/)
   })
 
@@ -93,6 +100,6 @@ describe('password sign-in', () => {
     const created = await createUser({ name: 'Komal Jadhav', mobile: '9812345670', email: '', designation: 'Front Office', roleIds: ['role-sunrise-frontOffice'], doctorId: null, active: true })
     await expect(loginWithPassword({ identifier: created.username, password: 'demo@123' })).rejects.toThrow(/invite/)
     await acceptInvite(created.inviteToken, { password: 'welcome123', confirm: 'welcome123' })
-    expect((await loginWithPassword({ identifier: created.username, password: 'welcome123' })).token).toMatch(/^mock_/)
+    expect(tokenOf(await loginWithPassword({ identifier: created.username, password: 'welcome123' }))).toMatch(/^mock_/)
   })
 })

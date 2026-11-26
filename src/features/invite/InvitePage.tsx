@@ -7,9 +7,10 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { acceptInvite, getInvite } from '@/api/auth'
 import { isApiError } from '@/api/client'
 import { useSessionStore } from '@/auth/sessionStore'
+import { goPastLogin } from '@/features/login/goPastLogin'
 import { showApiError } from '@/lib/apiErrors'
 import { formatDateTime } from '@/lib/dates'
-import { acceptInviteSchema, type AcceptInviteInput } from '@/types/auth'
+import { acceptInviteSchema, hasSessionToken, type AcceptInviteInput } from '@/types/auth'
 
 /** Public page opened from the invite email: set a password and sign in. */
 export function InvitePage() {
@@ -26,10 +27,12 @@ export function InvitePage() {
 
   const onSubmit = handleSubmit((values) =>
     accept.mutate(values, {
-      onSuccess: ({ token: sessionToken }) => {
-        qc.removeQueries()
-        setToken(sessionToken)
-        navigate('/', { replace: true })
+      onSuccess: (result) => {
+        if (hasSessionToken(result)) {
+          qc.removeQueries()
+          setToken(result.token)
+        }
+        goPastLogin(navigate, result, '/')
       },
       onError: (e) => showApiError(e, setError),
     }),

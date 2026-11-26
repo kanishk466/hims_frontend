@@ -1,9 +1,11 @@
 import { Avatar, Burger, Group, Kbd, Menu, Text, UnstyledButton } from '@mantine/core'
 import { spotlight } from '@mantine/spotlight'
-import { IconChecklist, IconChevronDown, IconEyeOff, IconLogout, IconMapRoute, IconSearch, IconSwitchHorizontal } from '@tabler/icons-react'
+import { IconChecklist, IconChevronDown, IconEyeOff, IconLogout, IconMapRoute, IconSearch, IconShieldLock, IconSwitchHorizontal } from '@tabler/icons-react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLogout, useSession, useStopPreview } from '@/auth/queries'
 import { useCan } from '@/auth/useCan'
+import { MfaSettingsModal } from '@/features/account/MfaSettingsModal'
 import { useShowGettingStarted } from '@/features/gettingStarted/queries'
 import { useTourStore } from '@/features/tour/tourStore'
 import { formatLongDate } from '@/lib/dates'
@@ -19,6 +21,7 @@ export function TopBar({ navOpened, toggleNav }: { navOpened: boolean; toggleNav
   const startTour = useTourStore((s) => s.start)
   const canSetup = useCan('admin.setup.edit')
   const showGettingStarted = useShowGettingStarted()
+  const [mfaOpen, setMfaOpen] = useState(false)
   if (!session) return null
 
   // Explicit logout lands on the login page with no "return to" page, so the next user starts at their home.
@@ -121,6 +124,9 @@ export function TopBar({ navOpened, toggleNav }: { navOpened: boolean; toggleNav
                 Getting started
               </Menu.Item>
             )}
+            <Menu.Item leftSection={<IconShieldLock size={16} />} onClick={() => setMfaOpen(true)}>
+              Two-factor authentication
+            </Menu.Item>
             <Menu.Divider />
             <Menu.Item leftSection={<IconSwitchHorizontal size={16} />} onClick={() => leave('/login/demo')}>
               Switch user
@@ -132,6 +138,7 @@ export function TopBar({ navOpened, toggleNav }: { navOpened: boolean; toggleNav
           </Menu.Dropdown>
         </Menu>
       </Group>
+      {mfaOpen && <MfaSettingsModal onClose={() => setMfaOpen(false)} />}
     </Group>
   )
 }

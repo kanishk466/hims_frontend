@@ -7,6 +7,7 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { isApiError } from '@/api/client'
 import { usePasswordLogin, useSession } from '@/auth/queries'
 import { signInSchema, type SignInInput } from '@/types/auth'
+import { goPastLogin } from './goPastLogin'
 import { ForgotPasswordModal } from './ForgotPasswordModal'
 
 /** Sign in with username (or mobile) and password. The demo user picker is one click away. */
@@ -23,7 +24,7 @@ export function LoginPage() {
 
   const submit = handleSubmit((input) =>
     login.mutate(input, {
-      onSuccess: () => navigate(from, { replace: true }),
+      onSuccess: (result) => goPastLogin(navigate, result, from),
       onError: (e) => {
         if (isApiError(e) && e.code === 'bad_credentials') setFocus('password')
       },
@@ -75,7 +76,7 @@ export function LoginPage() {
           Every demo user’s password is <b>demo@123</b>, e.g. <b>sanjay.kulkarni</b> (Clinic Admin) or <b>vikram.rao</b> (Doctor). Sign in as <b>rohan.mehta</b> (Platform Super Admin) to provision a brand-new clinic and walk through its setup wizard.
         </Text>
       </Stack>
-      {forgot && <ForgotPasswordModal initialIdentifier={getValues('identifier')} onClose={() => setForgot(false)} onDone={() => navigate(from, { replace: true })} />}
+      {forgot && <ForgotPasswordModal initialIdentifier={getValues('identifier')} onClose={() => setForgot(false)} onDone={(result) => goPastLogin(navigate, result, from)} />}
     </Center>
   )
 }

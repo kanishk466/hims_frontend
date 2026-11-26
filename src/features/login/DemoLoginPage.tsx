@@ -6,6 +6,7 @@ import { useDemoUsers, useLogin, useSession } from '@/auth/queries'
 import { showApiError } from '@/lib/apiErrors'
 import { initials } from '@/lib/text'
 import type { DemoPersona, DemoUser } from '@/types/auth'
+import { goPastLogin } from './goPastLogin'
 
 const PERSONA_COLOR: Record<DemoPersona, string> = {
   superAdmin: 'grape',
@@ -31,7 +32,7 @@ export function DemoLoginPage() {
 
   const pick = (user: DemoUser) => {
     if (login.isPending || user.status !== 'active') return
-    login.mutate(user.id, { onSuccess: () => navigate(from, { replace: true }), onError: (e) => showApiError(e) })
+    login.mutate(user.id, { onSuccess: (result) => goPastLogin(navigate, result, from), onError: (e) => showApiError(e) })
   }
 
   // Press 1–8 to log in as the matching card.

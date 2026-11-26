@@ -12,6 +12,13 @@ import { getIntegrationSettings, updateIntegrationSettings } from './integration
 import { getPrintSettings, updatePrintSettings } from './print'
 import { completeSetup, getSetupProgress, markServicesReviewed, updateClinicProfile } from './setup'
 import { createUser, listRoles } from './users'
+import { hasSessionToken } from '@/types/auth'
+
+/** No seeded test persona/invite is simulated as MFA-gated. */
+function tokenOf(result: Awaited<ReturnType<typeof acceptInvite>>): string {
+  if (!hasSessionToken(result)) throw new Error('Test login unexpectedly required an MFA step')
+  return result.token
+}
 
 const NEW_CLINIC: CreateClinicInput = {
   name: 'Shree Ganesh Hospital',
@@ -29,7 +36,7 @@ const NEW_CLINIC: CreateClinicInput = {
 async function newClinicAdmin() {
   await loginAs('superAdmin')
   const result = await createClinic(NEW_CLINIC)
-  const { token } = await acceptInvite(result.inviteToken, { password: 'secret123', confirm: 'secret123' })
+  const token = tokenOf(await acceptInvite(result.inviteToken, { password: 'secret123', confirm: 'secret123' }))
   useSessionStore.getState().setToken(token)
   return result
 }
@@ -70,7 +77,7 @@ describe('invite', () => {
     await loginAs('superAdmin')
     const r = await createClinic(NEW_CLINIC)
     await expect(login(r.clinic.admin!.id)).rejects.toMatchObject({ code: 'invite_pending' })
-    const { token } = await acceptInvite(r.inviteToken, { password: 'secret123', confirm: 'secret123' })
+    const token = tokenOf(await acceptInvite(r.inviteToken, { password: 'secret123', confirm: 'secret123' }))
     useSessionStore.getState().setToken(token)
     const s = await getSession()
     expect(s.clinic?.setupComplete).toBe(false)
